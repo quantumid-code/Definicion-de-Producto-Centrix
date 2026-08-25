@@ -1,0 +1,517 @@
+asyncapi: 3.0.0
+
+info:
+  title: Centrix · Catálogo de eventos
+  version: 0.1.0-borrador
+  description: |
+    Catálogo canónico de eventos del bus interno de Centrix.
+
+    Deriva del modelo canónico de dominio (documento 0.2) y no contiene artefactos de mensajería de
+    ninguna cámara. Regla irrevocable 8.
+
+    ## Marcado de contenido sensible
+
+    Cada canal declara `x-carries-cardholder-data`. Los marcados como verdaderos **quedan sujetos a
+    la regla irrevocable 4**: retención mínima declarada explícitamente, nunca la del bus por
+    defecto. La retención por defecto de un bus de eventos constituye almacenamiento de datos de
+    tarjeta después de la autorización, que es no conformidad automática.
+
+    **Ningún canal transporta el número de cuenta principal ni el código de seguridad.** Reglas
+    irrevocables 2 y 3. El marcado de contenido sensible aplica a datos de titular de tarjeta que sí
+    pueden transitar —referencia de instrumento, últimos dígitos, marca— y obliga a tratarlos con
+    retención mínima aunque no sean el dato prohibido.
+
+    ## Configuración obligatoria en el arranque
+
+    Todo canal declara factor de replicación y mínimo de réplicas sincronizadas, **fijados desde el
+    bootstrap**. Pasar a tres réplicas no protege nada si los tópicos siguen creándose con factor
+    uno. El piloto corre con un solo nodo y la configuración declarada igualmente.
+
+    ## Entrega y orden
+
+    Entrega **al menos una vez**. Todo consumidor debe ser idempotente por identificador de evento.
+    El orden se garantiza únicamente dentro de la misma clave de partición.
+
+defaultContentType: application/json
+
+servers:
+  bus:
+    host: bus.interno
+    protocol: kafka
+    description: Bus de eventos interno del despliegue del cliente
+
+channels:
+
+  intencionCreada:
+    address: centrix.payments.intent.created.v1
+    title: Intención de cobro creada
+    messages:
+      intencionCreada:
+        $ref: '#/components/messages/EventoIntencion'
+    x-partition-key: intent_id
+    x-carries-cardholder-data: true
+    x-retention: PT1H
+    x-replication-factor: 3
+    x-min-insync-replicas: 2
+
+  intentoEnviado:
+    address: centrix.payments.attempt.sent.v1
+    title: Intento enviado al procesador
+    messages:
+      intentoEnviado:
+        $ref: '#/components/messages/EventoIntento'
+    x-partition-key: intent_id
+    x-carries-cardholder-data: true
+    x-retention: PT1H
+    x-replication-factor: 3
+    x-min-insync-replicas: 2
+
+  intentoResuelto:
+    address: centrix.payments.attempt.resolved.v1
+    title: Intento resuelto
+    description: |
+      Aprobado, declinado o indeterminado. **Incluye la resolución tardía**, cuando la respuesta
+      llega después de vencida la ventana de envío. Decisión D19.
+    messages:
+      intentoResuelto:
+        $ref: '#/components/messages/EventoIntento'
+    x-partition-key: intent_id
+    x-carries-cardholder-data: false
+    x-retention: P7D
+    x-replication-factor: 3
+    x-min-insync-replicas: 2
+
+  intencionCambioDeEstado:
+    address: centrix.payments.intent.status_changed.v1
+    title: Cambio de estado de una intención
+    description: Toda transición de la máquina de estados del documento 0.2.
+    messages:
+      cambioDeEstado:
+        $ref: '#/components/messages/EventoIntencion'
+    x-partition-key: intent_id
+    x-carries-cardholder-data: false
+    x-retention: P30D
+    x-replication-factor: 3
+    x-min-insync-replicas: 2
+
+  capturaRegistrada:
+    address: centrix.payments.capture.recorded.v1
+    title: Captura registrada
+    messages:
+      captura:
+        $ref: '#/components/messages/EventoImporte'
+    x-partition-key: intent_id
+    x-carries-cardholder-data: false
+    x-retention: P30D
+    x-replication-factor: 3
+    x-min-insync-replicas: 2
+
+  devolucionRegistrada:
+    address: centrix.payments.refund.recorded.v1
+    title: Devolución registrada
+    messages:
+      devolucion:
+        $ref: '#/components/messages/EventoImporte'
+    x-partition-key: intent_id
+    x-carries-cardholder-data: false
+    x-retention: P30D
+    x-replication-factor: 3
+    x-min-insync-replicas: 2
+
+  comisionEvaluada:
+    address: centrix.fees.assessed.v1
+    title: Comisión evaluada
+    description: |
+      Lleva el desglose por eslabón y las versiones de esquema aplicadas. Un importe de comisión sin
+      su desglose no se puede defender en una disputa. Documento 0.6.
+    messages:
+      comision:
+        $ref: '#/components/messages/EventoComision'
+    x-partition-key: merchant_id
+    x-carries-cardholder-data: false
+    x-retention: P90D
+    x-replication-factor: 3
+    x-min-insync-replicas: 2
+
+  asientoRegistrado:
+    address: centrix.ledger.entry.recorded.v1
+    title: Asiento contable registrado
+    messages:
+      asiento:
+        $ref: '#/components/messages/EventoAsiento'
+    x-partition-key: merchant_id
+    x-carries-cardholder-data: false
+    x-retention: P90D
+    x-replication-factor: 3
+    x-min-insync-replicas: 2
+
+  asientoConfirmado:
+    address: centrix.ledger.entry.confirmed.v1
+    title: Asiento pasado a confirmado
+    description: |
+      Única mutación admitida sobre un asiento. Libera el importe para dispersión. Documento 0.7,
+      invariante L4.
+    messages:
+      asiento:
+        $ref: '#/components/messages/EventoAsiento'
+    x-partition-key: merchant_id
+    x-carries-cardholder-data: false
+    x-retention: P90D
+    x-replication-factor: 3
+    x-min-insync-replicas: 2
+
+  loteCerrado:
+    address: centrix.batches.closed.v1
+    title: Lote cerrado
+    messages:
+      lote:
+        $ref: '#/components/messages/EventoLote'
+    x-partition-key: terminal_id
+    x-carries-cardholder-data: false
+    x-retention: P30D
+    x-replication-factor: 3
+    x-min-insync-replicas: 2
+
+  movimientoIngerido:
+    address: centrix.reconciliation.movement.ingested.v1
+    title: Movimiento conciliatorio ingerido
+    description: |
+      Ingesta idempotente por lote (invariante K8): reprocesar el mismo archivo no duplica partidas.
+    messages:
+      movimiento:
+        $ref: '#/components/messages/EventoMovimiento'
+    x-partition-key: source
+    x-carries-cardholder-data: false
+    x-retention: P30D
+    x-replication-factor: 3
+    x-min-insync-replicas: 2
+
+  partidaClasificada:
+    address: centrix.reconciliation.item.classified.v1
+    title: Partida de conciliación clasificada
+    messages:
+      partida:
+        $ref: '#/components/messages/EventoPartida'
+    x-partition-key: merchant_id
+    x-carries-cardholder-data: false
+    x-retention: P90D
+    x-replication-factor: 3
+    x-min-insync-replicas: 2
+
+  dispersionBloqueada:
+    address: centrix.settlement.payout.blocked.v1
+    title: Dispersión bloqueada
+    description: |
+      Se emite cuando existe partida no conciliada o transacción indeterminada asociada.
+      Invariantes I4 e I6.
+    messages:
+      dispersion:
+        $ref: '#/components/messages/EventoDispersion'
+    x-partition-key: merchant_id
+    x-carries-cardholder-data: false
+    x-retention: P90D
+    x-replication-factor: 3
+    x-min-insync-replicas: 2
+
+  comercioCambioDeEstado:
+    address: centrix.merchants.status_changed.v1
+    title: Cambio de estado de una sub-afiliación
+    description: |
+      Incluye los cierres por cascada de cancelación de afiliación, que el cliente no solicitó y
+      debe conocer. Decisión D39.
+    messages:
+      comercio:
+        $ref: '#/components/messages/EventoComercio'
+    x-partition-key: merchant_id
+    x-carries-cardholder-data: false
+    x-retention: P90D
+    x-replication-factor: 3
+    x-min-insync-replicas: 2
+
+  afiliacionEstadoObservado:
+    address: centrix.affiliations.observed_status_changed.v1
+    title: Cambio del estado observado de una afiliación
+    description: |
+      La divergencia entre estado declarado y observado es la señal de que una afiliación fue
+      cerrada por un tercero sin aviso. Dispara el cortacircuitos. Decisiones D40 y D41.
+    messages:
+      afiliacion:
+        $ref: '#/components/messages/EventoAfiliacion'
+    x-partition-key: affiliation_id
+    x-carries-cardholder-data: false
+    x-retention: P90D
+    x-replication-factor: 3
+    x-min-insync-replicas: 2
+
+  rutaDegradada:
+    address: centrix.routing.route_degraded.v1
+    title: Ruta degradada o restablecida
+    messages:
+      ruta:
+        $ref: '#/components/messages/EventoRuta'
+    x-partition-key: route_id
+    x-carries-cardholder-data: false
+    x-retention: P7D
+    x-replication-factor: 3
+    x-min-insync-replicas: 2
+
+operations:
+
+  publicarIntencionCreada:
+    action: send
+    channel: { $ref: '#/channels/intencionCreada' }
+  publicarIntentoEnviado:
+    action: send
+    channel: { $ref: '#/channels/intentoEnviado' }
+  publicarIntentoResuelto:
+    action: send
+    channel: { $ref: '#/channels/intentoResuelto' }
+  publicarCambioDeEstado:
+    action: send
+    channel: { $ref: '#/channels/intencionCambioDeEstado' }
+  publicarCaptura:
+    action: send
+    channel: { $ref: '#/channels/capturaRegistrada' }
+  publicarDevolucion:
+    action: send
+    channel: { $ref: '#/channels/devolucionRegistrada' }
+  publicarComision:
+    action: send
+    channel: { $ref: '#/channels/comisionEvaluada' }
+  publicarAsiento:
+    action: send
+    channel: { $ref: '#/channels/asientoRegistrado' }
+  publicarAsientoConfirmado:
+    action: send
+    channel: { $ref: '#/channels/asientoConfirmado' }
+  publicarLoteCerrado:
+    action: send
+    channel: { $ref: '#/channels/loteCerrado' }
+  publicarMovimiento:
+    action: send
+    channel: { $ref: '#/channels/movimientoIngerido' }
+  publicarPartida:
+    action: send
+    channel: { $ref: '#/channels/partidaClasificada' }
+  publicarDispersionBloqueada:
+    action: send
+    channel: { $ref: '#/channels/dispersionBloqueada' }
+  publicarComercio:
+    action: send
+    channel: { $ref: '#/channels/comercioCambioDeEstado' }
+  publicarAfiliacionObservada:
+    action: send
+    channel: { $ref: '#/channels/afiliacionEstadoObservado' }
+  publicarRutaDegradada:
+    action: send
+    channel: { $ref: '#/channels/rutaDegradada' }
+
+components:
+
+  schemas:
+
+    Sobre:
+      type: object
+      description: |
+        Sobre común a todo evento. **El consumidor deduplica por `event_id`** y descarta eventos con
+        `sequence` menor a la última procesada para el mismo `resource_id`.
+      required: [event_id, event_type, occurred_at, tenant_id, resource_id, sequence, trace_id]
+      properties:
+        event_id: { type: string }
+        event_type: { type: string }
+        occurred_at: { type: string, format: date-time }
+        tenant_id:
+          type: string
+          description: Todo evento pertenece a un tenant. Invariante T1.
+        resource_id: { type: string }
+        sequence: { type: integer }
+        trace_id:
+          type: string
+          description: Identificador único de trazabilidad punta a punta.
+        config_version:
+          type: string
+          description: Versión de configuración aplicada. Decisión D21.
+        schema_version:
+          type: string
+          description: Versión del esquema del evento. La versión mayor va en el nombre del canal.
+
+    Importe:
+      type: object
+      description: Entero en unidades mínimas más moneda con exponente explícito. Regla irrevocable 1.
+      required: [value, currency]
+      properties:
+        value: { type: integer, format: int64 }
+        currency:
+          type: object
+          required: [code, exponent]
+          properties:
+            code: { type: string }
+            exponent: { type: integer }
+
+  messages:
+
+    EventoIntencion:
+      name: EventoIntencion
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/Sobre'
+          - type: object
+            properties:
+              intent_id: { type: string }
+              merchant_id: { type: string }
+              status: { type: string }
+              previous_status: { type: [string, 'null'] }
+              flow: { type: string, enum: [extraccion, empuje] }
+              amount: { $ref: '#/components/schemas/Importe' }
+
+    EventoIntento:
+      name: EventoIntento
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/Sobre'
+          - type: object
+            properties:
+              intent_id: { type: string }
+              attempt_id: { type: string }
+              status: { type: string }
+              result_class: { type: string }
+              reason_code: { type: string }
+              affiliation_id: { type: string }
+              route: { type: string }
+              late_resolution:
+                type: boolean
+                description: Verdadera cuando la respuesta llegó tras vencer la ventana de envío.
+
+    EventoImporte:
+      name: EventoImporte
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/Sobre'
+          - type: object
+            properties:
+              intent_id: { type: string }
+              amount: { $ref: '#/components/schemas/Importe' }
+
+    EventoComision:
+      name: EventoComision
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/Sobre'
+          - type: object
+            properties:
+              intent_id: { type: string }
+              merchant_id: { type: string }
+              net_to_merchant: { $ref: '#/components/schemas/Importe' }
+              assignments:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    link_role: { type: string }
+                    base: { $ref: '#/components/schemas/Importe' }
+                    fee: { $ref: '#/components/schemas/Importe' }
+                    tax: { $ref: '#/components/schemas/Importe' }
+                    scheme_version: { type: string }
+
+    EventoAsiento:
+      name: EventoAsiento
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/Sobre'
+          - type: object
+            properties:
+              entry_id: { type: string }
+              state: { type: string, enum: [aprobado, confirmado] }
+              account: { type: string }
+              amount: { $ref: '#/components/schemas/Importe' }
+              period: { type: string }
+
+    EventoLote:
+      name: EventoLote
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/Sobre'
+          - type: object
+            properties:
+              batch_id: { type: string }
+              terminal_id: { type: string }
+              status: { type: string }
+
+    EventoMovimiento:
+      name: EventoMovimiento
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/Sobre'
+          - type: object
+            properties:
+              movement_id: { type: string }
+              source: { type: string }
+              movement_type:
+                type: string
+                description: |
+                  Incluye `no_clasificado`. Descartar lo que no se entiende es la forma más
+                  silenciosa de perder dinero. Invariante K2.
+              amount: { $ref: '#/components/schemas/Importe' }
+              ingestion_batch: { type: string }
+
+    EventoPartida:
+      name: EventoPartida
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/Sobre'
+          - type: object
+            properties:
+              item_id: { type: string }
+              status: { type: string }
+              correlation_level: { type: string }
+              difference: { $ref: '#/components/schemas/Importe' }
+
+    EventoDispersion:
+      name: EventoDispersion
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/Sobre'
+          - type: object
+            properties:
+              payout_id: { type: string }
+              merchant_id: { type: string }
+              blocked_reason: { type: string }
+              amount: { $ref: '#/components/schemas/Importe' }
+
+    EventoComercio:
+      name: EventoComercio
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/Sobre'
+          - type: object
+            properties:
+              merchant_id: { type: string }
+              status: { type: string }
+              reason: { type: string }
+              cascaded_from_affiliation:
+                type: boolean
+                description: Verdadera cuando el cierre proviene de la cascada. Decisión D39.
+
+    EventoAfiliacion:
+      name: EventoAfiliacion
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/Sobre'
+          - type: object
+            properties:
+              affiliation_id: { type: string }
+              declared_status: { type: string }
+              observed_status: { type: string }
+              consecutive_structural_declines: { type: integer }
+              circuit_open: { type: boolean }
+
+    EventoRuta:
+      name: EventoRuta
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/Sobre'
+          - type: object
+            properties:
+              route_id: { type: string }
+              available: { type: boolean }
+              reason: { type: string }
