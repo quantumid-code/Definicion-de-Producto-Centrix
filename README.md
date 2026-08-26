@@ -1,1 +1,0 @@
-# Definicion-de-Producto-Centrix
