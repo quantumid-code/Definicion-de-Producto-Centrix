@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Centrix · Paquete de especificación — explorador</title>
+<style>
+:root{--bg:#FAF9F7;--s1:#F2F1ED;--s2:#FFFFFF;--tx:#1D2939;--t2:#5F6B7A;--t3:#8A94A0;
+--bd:#E4E7EC;--bd2:#CDD3DA;--az:#1A3A6B;--acc:#0A1E3F;
+--ma:#FAECE7;--mat:#993C1D;--maa:#D85A30;--mb:#EEEDFE;--mbt:#3C3489;--mba:#7F77DD;
+--mc:#E6F1FB;--mct:#0C447C;--mca:#378ADD;--md:#E1F5EE;--mdt:#085041;--mda:#1D9E75;
+--me:#FAEEDA;--met:#633806;--mea:#BA7517}
+@media(prefers-color-scheme:dark){:root{--bg:#17181A;--s1:#1E1F22;--s2:#232427;--tx:#E9E7E2;
+--t2:#A8AEB6;--t3:#7C838C;--bd:#33353A;--bd2:#464951;--az:#9FC0EE;--acc:#C7DBF5;
+--ma:#712B13;--mat:#F5C4B3;--maa:#F0997B;--mb:#3C3489;--mbt:#CECBF6;--mba:#AFA9EC;
+--mc:#0C447C;--mct:#B5D4F4;--mca:#85B7EB;--md:#085041;--mdt:#9FE1CB;--mda:#5DCAA5;
+--me:#633806;--met:#FAC775;--mea:#EF9F27}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 24px 60px}
+h1{font-size:24px;font-weight:600;margin:0 0 4px;letter-spacing:-.01em}
+.sub{color:var(--t2);font-size:14px;margin:0 0 22px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:18px;
+position:sticky;top:0;background:var(--bg);padding:10px 0;z-index:20;border-bottom:1px solid var(--bd)}
+.tab{padding:7px 15px;border-radius:8px;border:1px solid var(--bd2);background:transparent;
+color:var(--t2);font-size:14px;cursor:pointer;font-family:inherit}
+.tab:hover{background:var(--s1);color:var(--tx)}
+.tab.on{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+@media(prefers-color-scheme:dark){.tab.on{color:#17181A}}
+input[type=search]{padding:7px 12px;border-radius:8px;border:1px solid var(--bd2);
+background:var(--s2);color:var(--tx);font:14px inherit;font-family:inherit;min-width:190px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:16px;font-size:13px;color:var(--t3)}
+.fl{padding:4px 11px;border-radius:20px;border:1px solid var(--bd2);background:transparent;
+color:var(--t2);font-size:13px;cursor:pointer;font-family:inherit}
+.fl.on{border-color:transparent}
+.fl[data-m=a].on{background:var(--ma);color:var(--mat)}.fl[data-m=b].on{background:var(--mb);color:var(--mbt)}
+.fl[data-m=c].on{background:var(--mc);color:var(--mct)}.fl[data-m=d].on{background:var(--md);color:var(--mdt)}
+.fl[data-m=e].on{background:var(--me);color:var(--met)}
+.view{display:none}.view.on{display:block}
+.lay{border:1px solid var(--bd);border-radius:12px;margin-bottom:9px;background:var(--s2);overflow:hidden}
+.lay.par{border-style:dashed;border-color:var(--bd2)}
+.lh{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;user-select:none}
+.lh:hover{background:var(--s1)}
+.cv{width:16px;color:var(--t3);transition:transform .15s;flex:none;font-size:12px}
+.lay.open .cv{transform:rotate(90deg)}
+.pill{font-size:12px;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.body{display:none;padding:0 16px 10px}.lay.open .body{display:block}
+.doc{border-top:1px solid var(--bd);padding:10px 4px;cursor:pointer}
+.st{font-size:11.5px;padding:2px 8px;border-radius:20px;white-space:nowrap;line-height:1.5}
+.st-generado{background:#DDF0DD;color:#1E5B2E}
+.st-bloqueado{background:#FCEBEB;color:#A32D2D}
+.st-pendiente{background:var(--s1);color:var(--t3)}
+@media(prefers-color-scheme:dark){.st-generado{background:#173404;color:#C0DD97}
+.st-bloqueado{background:#501313;color:#F09595}}
+.tick{color:#2E7D3A;font-weight:600}
+.nota{font-size:12.5px;color:var(--t2);font-style:italic;margin-top:3px}
+.prog{height:7px;border-radius:4px;background:var(--s1);overflow:hidden;display:flex}
+.prog i{display:block;height:100%}
+.kpi{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 12px;font-size:13.5px;color:var(--t2)}
+.kpi b{color:var(--tx);font-weight:600}
+.doc:hover .dn{color:var(--maa)}
+.dr{display:flex;align-items:center;gap:10px}
+.dot{width:9px;height:9px;border-radius:3px;flex:none}
+.did{font-size:13px;color:var(--t3);min-width:32px;font-variant-numeric:tabular-nums}
+.dn{font-size:14px;flex:1}
+.det{display:none;padding:10px 0 4px 32px;font-size:13.5px;color:var(--t2);line-height:1.65}
+.doc.open .det{display:block}
+.lb{color:var(--t3);margin-right:5px}
+.chip{display:inline-block;font-size:12.5px;padding:2px 9px;margin:2px 4px 2px 0;border-radius:7px;
+border:1px solid var(--bd2);cursor:pointer;color:var(--t2);background:var(--s2)}
+.chip:hover{background:var(--s1);color:var(--tx)}
+.hl{background:var(--ma);border-radius:8px}
+.wave{margin-bottom:14px;border:1px solid var(--bd);border-radius:12px;background:var(--s2);padding:14px 16px}
+.wh{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+.wt{font-size:15px;font-weight:600}
+.wn{font-size:13px;color:var(--t3)}
+.nodes{display:flex;flex-wrap:wrap;gap:7px}
+.nd{padding:5px 11px;border-radius:8px;font-size:13px;cursor:pointer;border:1px solid transparent;line-height:1.35}
+.nd:hover{outline:2px solid var(--bd2)}
+.nd.sel{outline:2px solid var(--acc)}
+.nd small{opacity:.72;font-size:11.5px}
+#gwrap{overflow-x:auto;border:1px solid var(--bd);border-radius:12px;background:var(--s2);padding:12px}
+.panel{position:sticky;bottom:0;background:var(--s2);border:1px solid var(--bd2);border-radius:12px;
+padding:14px 16px;margin-top:14px;font-size:13.5px;color:var(--t2);line-height:1.65}
+.panel h3{margin:0 0 6px;font-size:15px;color:var(--tx);font-weight:600}
+.hide{display:none!important}
+.dim{opacity:.16}
+.leg{font-size:12.5px;color:var(--t3);margin-top:10px}
+.crit{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:8px}
+.arw{color:var(--t3);font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+td,th{text-align:left;padding:7px 8px;border-bottom:1px solid var(--bd)}
+th{color:var(--t3);font-weight:500;font-size:12.5px}
+.foot{margin-top:34px;padding-top:14px;border-top:1px solid var(--bd);font-size:12.5px;color:var(--t3)}
+</style></head><body><div class="wrap">
+<h1>Centrix · Paquete de especificación</h1>
+<p class="sub">62 documentos · 8 capas · 10 olas de dependencia. Todo lo que debe existir antes de escribir la primera línea de código.</p>
+<div class="kpi" id="kpi"></div><div class="prog" id="prog"></div><div style="height:18px"></div>
+<div class="bar">
+<button class="tab on" data-v="capas">Capas</button>
+<button class="tab" data-v="sec">Secuencia</button>
+<button class="tab" data-v="graf">Grafo</button>
+<button class="tab" data-v="crit">Ruta crítica</button>
+<span style="flex:1"></span>
+<input type="search" id="q" placeholder="Buscar en los 62 documentos…">
+</div>
+<div class="chips">
+<span>Momento</span>
+<button class="fl" data-m="a">días 1-3</button><button class="fl" data-m="b">semana 1</button>
+<button class="fl" data-m="c">semana 2</button><button class="fl" data-m="d">semanas 3-10</button>
+<button class="fl" data-m="e">mes 0-3</button>
+<span style="width:12px"></span><span>Estado</span>
+<button class="fl" data-s="generado">generado</button>
+<button class="fl" data-s="bloqueado">bloqueado</button>
+<button class="fl" data-s="pendiente">pendiente</button>
+<span style="flex:1"></span><button class="fl" id="all">Expandir todo</button>
+<span id="cnt"></span></div>
+<div class="view on" id="v-capas"></div>
+<div class="view" id="v-sec"></div>
+<div class="view" id="v-graf"><div id="gwrap"></div>
+<p class="leg">Cada fila es una ola. Un documento solo puede empezar cuando todos los que apuntan hacia él están congelados. Pasa el cursor o haz clic sobre un nodo para aislar su cadena completa, aguas arriba y aguas abajo.</p></div>
+<div class="view" id="v-crit"></div>
+<div class="panel hide" id="panel"></div>
+<p class="foot">Centrix · Interno confidencial · Actualizado el 16 de agosto de 2026 · v2 · Acompaña a CENTRIX_Paquete_de_Especificacion_Indice_Maestro.docx</p>
+</div>
+<script>
+const D=[{"id": "0.1", "n": "Glosario canónico de dominio", "cap": "0", "capn": "Capa 0 · Fundamentos", "m": "a", "dep": [], "t": "Un término, una definición, un nombre en código. Transacción, comercio, sucursal, afiliación, terminal, regla de comisión, evaluación de comisión, liquidación, dispersión, movimiento conciliatorio, asiento contable. Prohibidos los sinónimos.", "p": "Sin esto, cada agente inventa su propio nombre para la misma cosa y los contratos no cierran.", "g": "9.1", "estado": "generado", "nota": "Glosario · v0.3 · afiliación por canal, identidad de asignación, identificador de ciclo de vida en red"}, {"id": "0.2", "n": "Modelo canónico de dominio: entidades, estados, transiciones e invariantes", "cap": "0", "capn": "Capa 0 · Fundamentos", "m": "a", "dep": ["0.1"], "t": "Cada entidad con sus estados, las transiciones válidas, quién las dispara y qué invariante no puede romperse nunca. Incluye el ciclo de vida del comercio con motivos.", "p": "Es el entregable que la regla irrevocable 8 exige antes de cualquier adaptador.", "g": "9.1, 1.8", "estado": "generado", "nota": "Modelo canónico · v0.4 · afiliación con 9 estados, 4 causas de bloqueo de dispersión"}, {"id": "0.3", "n": "Registro de decisiones de arquitectura (ADR)", "cap": "0", "capn": "Capa 0 · Fundamentos", "m": "a", "dep": ["0.1"], "t": "Las 13 decisiones del Anexo E, más el stack, más las 8 reglas irrevocables, cada una con contexto, alternativas descartadas y consecuencia. Formato de una decisión por archivo, numerado y versionado.", "p": "Un agente que no ve el porqué de una decisión la revierte con la mejor intención.", "g": "—", "estado": "generado", "nota": "Registro · v0.5 · 33 decisiones cerradas, 57 preguntas · P21 cerrada"}, {"id": "0.4", "n": "Las ocho reglas irrevocables", "cap": "0", "capn": "Capa 0 · Fundamentos", "m": "a", "dep": ["0.3"], "t": "Enunciadas, con el control automatizado que verifica cada una y qué hacer si el control falla. No son recomendaciones: son condiciones de mezcla.", "p": "Dinero entero, nunca CVV, nunca descifrar, retención mínima, nunca datos reales, sin árboles compartidos, revisión por otro, canónico primero.", "g": "9.4, 9.14, 9.15, 9.19", "estado": "generado", "nota": "8 reglas con su control automatizado. 5 de 8 son de pipeline"}, {"id": "0.5", "n": "Modelo monetario: unidades mínimas, monedas, redondeo e impuestos", "cap": "0", "capn": "Capa 0 · Fundamentos", "m": "b", "dep": ["0.2"], "t": "Representación entera, política de redondeo con el punto exacto donde ocurre, tratamiento de IVA y retenciones, y multi-moneda contemplada aunque no se implemente.", "p": "El redondeo mal ubicado produce diferencias de centavos que la conciliación reporta como excepciones para siempre.", "g": "9.4, 4.35", "estado": "generado", "nota": "Prorrateo con distribución de residuo. División directa prohibida"}, {"id": "0.6", "n": "Modelo canónico de comisiones con reparto de N eslabones", "cap": "0", "capn": "Capa 0 · Fundamentos", "m": "b", "dep": ["0.5"], "t": "Esquema de datos que admite N partes desde el diseño, con esquemas de precio configurables y evaluación reproducible y auditable de cada cobro.", "p": "Ampliar de tres a N eslabones con historial obliga a recalcular la comisión de toda transacción persistida.", "g": "6.25", "estado": "generado", "nota": "v0.3 · resolución por prioridad. Si ninguna regla aplica es error, no respaldo"}, {"id": "0.7", "n": "Modelo contable: plan de cuentas, partida doble y estado dual", "cap": "0", "capn": "Capa 0 · Fundamentos", "m": "b", "dep": ["0.5"], "t": "Plan de cuentas, asiento por evento de negocio, y la distinción aprobado frente a confirmado en el propio modelo, no como bandera añadida.", "p": "Sin estado dual no hay bloqueo de liquidación y no hay conciliación automática posible.", "g": "6.24", "estado": "generado", "nota": "v0.3 · la cuenta de destino se congela en cada dispersión (L10)"}, {"id": "0.8", "n": "Modelo canónico de movimiento conciliatorio y llave de correlación", "cap": "0", "capn": "Capa 0 · Fundamentos", "m": "b", "dep": ["0.2", "0.7"], "t": "Qué es un movimiento con independencia de su origen, y cómo se correlaciona con la transacción propia. Define la llave que después consumen todos los puertos de conciliación.", "p": "Es lo que permite construir el motor de conciliación antes de saber cómo entrega los datos el tercero.", "g": "6.26, 7.17", "estado": "generado", "nota": "Llave de correlación jerárquica de 4 niveles. Aparece la conciliación de comisiones"}, {"id": "0.9", "n": "Modelo canónico de método de pago y abstracción de riel", "cap": "0", "capn": "Capa 0 · Fundamentos", "m": "b", "dep": ["0.2"], "t": "Método, riel, destino y moneda como conceptos configurables por país, no cableados. Wallet y QR extranjero como método de primera clase, no como caso especial de tarjeta.", "p": "Barato ahora, carísimo después. Es lo que habilita toda la Fase 1 y 2 de métodos sin tocar el núcleo.", "g": "8.7, 8.8", "estado": "generado", "nota": "v0.3 · capacidades por riel, marca y programa (D47)"}, {"id": "0.10", "n": "Modelo de identidad, jerarquía y multi-tenant", "cap": "0", "capn": "Capa 0 · Fundamentos", "m": "b", "dep": ["0.2"], "t": "Cliente, tenant, jerarquía de red, comercio, sucursal, terminal y usuario, con el aislamiento expresado en el modelo. Admite N niveles y sub-comercios aunque no se implementen.", "p": "El aislamiento entre clientes no se añade después: es una propiedad del esquema.", "g": "1.10, 9.8", "estado": "generado", "nota": "Aislamiento como propiedad del esquema. Jerarquía de profundidad variable"}, {"id": "0.11", "n": "Taxonomía canónica de errores y códigos de respuesta", "cap": "0", "capn": "Capa 0 · Fundamentos", "m": "b", "dep": ["0.2"], "t": "Catálogo propio de causas de rechazo y errores, con el mapeo desde y hacia los códigos de cada procesador. Estable e independiente del tercero.", "p": "Sin taxonomía propia, la tasa de aprobación por causa de rechazo no es comparable entre rutas y el argumento de venta se cae.", "g": "7.20, 9.2", "estado": "bloqueado", "nota": "Bloqueado por N2 · clases canónicas definibles, mapeo vacío sin manuales"}, {"id": "0.12", "n": "Prohibiciones explícitas para agentes", "cap": "0", "capn": "Capa 0 · Fundamentos", "m": "b", "dep": ["0.3", "0.4"], "t": "Lista cerrada de lo que un agente no puede hacer nunca, en lenguaje verificable. Se replica en cada repositorio.", "p": "Es la contraparte operativa de las reglas irrevocables en un método asistido por IA.", "g": "9.19", "estado": "generado", "nota": "v0.3 · 43 prohibiciones. Nada se expone si no funciona (D50)"}, {"id": "1.1", "n": "OpenAPI 3.1 pública", "cap": "1", "capn": "Capa 1 · Contratos", "m": "b", "dep": ["0.2", "0.11"], "t": "Cobro, cancelación, devolución, consulta de estado, alta de comercio y terminal, consulta de liquidación. Versionada, con ejemplos y errores tipados.", "p": "Es el producto. El primer cliente es un agregador que compra una interfaz, no pantallas.", "g": "4.22, 7.15", "estado": "generado", "nota": "OpenAPI 3.1 validado · capacidades por marca, 4 causas de bloqueo"}, {"id": "1.2", "n": "OpenAPI interna entre servicios", "cap": "1", "capn": "Capa 1 · Contratos", "m": "b", "dep": ["1.1"], "t": "Fronteras entre servicios propios, con propiedad clara de cada recurso.", "p": "Evita que los servicios se acoplen por base de datos compartida.", "g": "9.7", "estado": "pendiente", "nota": ""}, {"id": "1.3", "n": "AsyncAPI de eventos", "cap": "1", "capn": "Capa 1 · Contratos", "m": "b", "dep": ["0.2"], "t": "Catálogo de eventos con esquema, tópico, clave de partición, política de retención y semántica de entrega. Marca explícitamente qué eventos transportan contenido de tarjeta.", "p": "La retención por defecto de un bus de eventos constituye almacenamiento de datos sensibles después de la autorización.", "g": "9.14, 9.6", "estado": "generado", "nota": "AsyncAPI 3.0 · 17 canales con marcado de contenido sensible"}, {"id": "1.4", "n": "Esquemas JSON compartidos", "cap": "1", "capn": "Capa 1 · Contratos", "m": "b", "dep": ["0.2"], "t": "Fuente única de la que se derivan tanto los contratos como la validación en frontera. Generados, no escritos a mano dos veces.", "p": "Dos definiciones del mismo objeto divergen en semanas.", "g": "—", "estado": "pendiente", "nota": ""}, {"id": "1.5", "n": "Contrato del puerto de procesador (P1)", "cap": "1", "capn": "Capa 1 · Contratos", "m": "b", "dep": ["0.2", "0.11"], "t": "Autorización, cancelación, devolución, reverso, cierre de lote y consulta, en términos canónicos. Validado en papel contra Prosa antes de implementar Blumon.", "p": "Riesgo E10: si se escribe el adaptador primero, el puerto adopta la forma del primer procesador y Fase 1 es reescritura.", "g": "9.2, 4.46", "estado": "bloqueado", "nota": "Validable en papel: ya existe la segunda especificación real que exige la regla 8"}, {"id": "1.6", "n": "Contratos de los nueve puertos restantes", "cap": "1", "capn": "Capa 1 · Contratos", "m": "b", "dep": ["1.5"], "t": "Movimientos de conciliación, fichero bancario, emisora de vales, PAC, screening, KYC y firma, TMS, riel alternativo, ERP y core. Cada uno con su definición de terminado de seis criterios.", "p": "Convierte dependencias de módulo en dependencias de conector.", "g": "Hoja Puertos", "estado": "bloqueado", "nota": "Bloqueado por N2 y N4 · nueve puertos restantes"}, {"id": "1.7", "n": "Especificación de webhooks", "cap": "1", "capn": "Capa 1 · Contratos", "m": "c", "dep": ["1.3"], "t": "Firma, reintentos con retroceso, idempotencia del receptor, orden y política de entrega al menos una vez.", "p": "Ambigüedad heredada de la plataforma origen que se cierra aquí de una vez.", "g": "4.22, 9.30", "estado": "generado", "nota": "Firma sobre cuerpo crudo. Límite temporal, no de conteo. Cola de no entregados"}, {"id": "1.8", "n": "Política de versionado y compatibilidad", "cap": "1", "capn": "Capa 1 · Contratos", "m": "c", "dep": ["1.1"], "t": "Qué es un cambio compatible, cómo se deprecia, cuánto tiempo conviven versiones y qué se le promete por escrito a un cliente integrado.", "p": "Un cliente institucional no integra contra una interfaz sin política de versionado.", "g": "1.1 del assessment", "estado": "generado", "nota": "El cliente programa contra la clase, no contra el código"}, {"id": "1.9", "n": "Especificación de integración con el procesador, con reducción de alcance PCI como objetivo declarado", "cap": "1", "capn": "Capa 1 · Contratos", "m": "c", "dep": ["1.5"], "t": "Documento contractual, no solo técnico: dónde se cifra, dónde se descifra, qué campos viajan y con qué protección. Incluye la excepción de banda en claro y su resolución.", "p": "Al no controlar el terminal, la reducción de alcance es una condición contractual. Este documento es el principal instrumento de control.", "g": "10.13, 9.28", "estado": "pendiente", "nota": ""}, {"id": "1.10", "n": "Contrato entre la aplicación de terminal y el gateway", "cap": "1", "capn": "Capa 1 · Contratos", "m": "c", "dep": ["1.5"], "t": "Protocolo, idempotencia, deduplicación por inbox propio, comportamiento ante reintento y ante pérdida de conexión. Contempla el protocolo de caja desde el diseño.", "p": "La deduplicación no puede depender de la idempotencia del tercero: en tarjeta presente eso es dinero duplicado.", "g": "9.10, 2.10", "estado": "pendiente", "nota": ""}, {"id": "2.1", "n": "Derivación documentada de esquemas desde el manual operativo de la plataforma origen", "cap": "2", "capn": "Capa 2 · Datos", "m": "b", "dep": ["0.2"], "t": "Campo por campo, con la trazabilidad de dónde salió cada uno y qué se descartó por obsoleto.", "p": "Trabajo previo ineludible al no haber código fuente (H1). Debe hacerse una vez y bien.", "g": "9.29", "estado": "bloqueado", "nota": "Requiere el manual operativo de la plataforma origen, que Centrix tiene"}, {"id": "2.2", "n": "DDL por servicio, con propiedad por servicio", "cap": "2", "capn": "Capa 2 · Datos", "m": "b", "dep": ["1.4", "2.1"], "t": "Qué servicio es dueño de qué tabla. Ningún servicio escribe en tablas de otro.", "p": "La propiedad compartida de tablas es lo que impide replicar servicios después.", "g": "9.7", "estado": "generado", "nota": "DDL ejecutado contra PostgreSQL 16 · 41 tablas, 69 índices, 27 con aislamiento forzado"}, {"id": "2.3", "n": "Esquema físico del libro contable", "cap": "2", "capn": "Capa 2 · Datos", "m": "b", "dep": ["0.7"], "t": "Partida doble con estado dual, inmutabilidad de asientos y política de corrección por contrapartida, nunca por edición.", "p": "Un libro editable no es evidencia contable ni de auditoría.", "g": "6.24", "estado": "generado", "nota": "Libro inmutable por disparador. Cuadre verificado al escribir, no después"}, {"id": "2.4", "n": "Política de migraciones", "cap": "2", "capn": "Capa 2 · Datos", "m": "b", "dep": ["2.2"], "t": "Unicidad de numeración verificada en pipeline, migraciones reversibles, y la regla de que el modelo de lectura también migra.", "p": "Dos de las cinco cicatrices de producción del equipo origen fueron migraciones.", "g": "9.18", "estado": "generado", "nota": "v0.3 · las especificaciones de dialecto llevan vigencia, no solo versión"}, {"id": "2.5", "n": "Clasificación y retención de datos", "cap": "2", "capn": "Capa 2 · Datos", "m": "c", "dep": ["0.2"], "t": "Qué campo es dato de titular, qué es dato sensible de autenticación, dónde vive cada uno, cuánto tiempo y quién lo borra. Marca explícita de todo lo que entra al entorno de datos de tarjeta.", "p": "Es el insumo del diagrama de flujo de datos y de la reducción de alcance.", "g": "9.14, 9.21", "estado": "generado", "nota": "Cero columnas decimales, cero columnas de dato prohibido. Verificado en la base"}, {"id": "2.6", "n": "Tablas de mapeo declarativas por tercero", "cap": "2", "capn": "Capa 2 · Datos", "m": "c", "dep": ["1.6"], "t": "Formato común de mapeo, en configuración y nunca en código, con al menos dos mapeos reales por puerto crítico.", "p": "Es lo que hace que agregar un banco o una emisora sea configuración y no desarrollo.", "g": "P1-P10", "estado": "bloqueado", "nota": "Parcialmente desbloqueado: hay mapeo real suficiente para probar el formato"}, {"id": "2.7", "n": "Catálogo de datos sintéticos y política de datos de prueba", "cap": "2", "capn": "Capa 2 · Datos", "m": "c", "dep": ["2.5"], "t": "Generador, rangos de tarjeta de prueba por marca, y prohibición verificada de datos reales en desarrollo y pruebas.", "p": "Requisito del estándar y bloqueante del desarrollo del gateway.", "g": "9.16", "estado": "generado", "nota": "Los escenarios temporales son los que nadie genera y donde se pierde dinero"}, {"id": "3.1", "n": "Mapa de servicios del piloto", "cap": "3", "capn": "Capa 3 · Arquitectura e infraestructura", "m": "c", "dep": ["1.2"], "t": "Qué servicios existen, qué hace cada uno, qué datos posee y con quién habla. Nada más y nada menos que lo que el piloto necesita.", "p": "Define la superficie que hay que revisar, y la revisión es el cuello de botella.", "g": "—", "estado": "generado", "nota": "v0.3 · 14 servicios. Aparece el códec de tokens (D48)"}, {"id": "3.2", "n": "Topología y diagrama de flujo de datos de tarjeta", "cap": "3", "capn": "Capa 3 · Arquitectura e infraestructura", "m": "c", "dep": ["2.5", "3.1"], "t": "Entregable formal de cumplimiento: por dónde entra el dato, por dónde sale, dónde se cifra y dónde no existe. Se mantiene vivo.", "p": "Es el primer documento que pide un evaluador y el que determina el alcance real.", "g": "9.21", "estado": "generado", "nota": "v0.3 · dos canales de salida. La compuerta E3 se resuelve a favor"}, {"id": "3.3", "n": "Definición del entorno de datos de tarjeta y de la zona segmentada", "cap": "3", "capn": "Capa 3 · Arquitectura e infraestructura", "m": "c", "dep": ["3.2"], "t": "Perímetro explícito, controles de segmentación y justificación de qué queda fuera.", "p": "Definir el perímetro después obliga a rediseñar servicios ya en producción.", "g": "9.21", "estado": "generado", "nota": "2 servicios en zona conectada, 11 fuera. Segmentación verificable por prueba"}, {"id": "3.4", "n": "Evidencia documental de no acceso a llaves de descifrado", "cap": "3", "capn": "Capa 3 · Arquitectura e infraestructura", "m": "c", "dep": ["1.9", "3.2"], "t": "Cómo se demuestra, no cómo se afirma: diseño, controles y registros que lo prueban ante un tercero.", "p": "El auditor no acepta la afirmación. Sin esta evidencia diseñada desde el inicio, todo el ahorro de la decisión D1b se pierde.", "g": "9.22", "estado": "generado", "nota": "La prueba de byte a byte demuestra que no se descifró, y corre en cada construcción"}, {"id": "3.5", "n": "Arquitectura del bus de eventos", "cap": "3", "capn": "Capa 3 · Arquitectura e infraestructura", "m": "c", "dep": ["1.3"], "t": "Tópicos, particiones, factor de replicación y mínimo de réplicas sincronizadas fijados en el bootstrap, retención por tópico y política de reproceso.", "p": "Pasar a tres brokers no protege nada si los tópicos siguen creándose con factor uno.", "g": "9.6, 9.14", "estado": "generado", "nota": "Creación automática de tópicos deshabilitada: es control de la regla 4"}, {"id": "3.6", "n": "Diseño de alta disponibilidad y recuperación", "cap": "3", "capn": "Capa 3 · Arquitectura e infraestructura", "m": "c", "dep": ["3.1"], "t": "Replicación con failover automático, objetivos de tiempo y punto de recuperación, y el procedimiento de prueba. Documenta explícitamente que el piloto corre en instancia única y con qué acuerdo.", "p": "Es la capa sin nada construido y la que determina el nivel de servicio ofrecible.", "g": "9.5, 7.28", "estado": "generado", "nota": "Abre D46 · con AWS decidido, base administrada frente a autogestionada cambia"}, {"id": "3.7", "n": "Modelo de despliegue multi-tenant y frontera del control plane", "cap": "3", "capn": "Capa 3 · Arquitectura e infraestructura", "m": "c", "dep": ["0.10", "3.1"], "t": "Stack aislado por cliente, qué vive en la cuenta de Centrix y qué en la del cliente, y por qué el control plane nunca se coloca con el cliente.", "p": "La frontera debe respetarse desde la primera línea de código aunque el control plane no exista todavía.", "g": "9.8", "estado": "generado", "nota": "Aislamiento doble. Incluye el hallazgo de RLS en tablas particionadas"}, {"id": "3.8", "n": "Diseño de observabilidad y correlación", "cap": "3", "capn": "Capa 3 · Arquitectura e infraestructura", "m": "c", "dep": ["0.8", "1.3"], "t": "Trazas, métricas y registros con el identificador único punta a punta, retención de doce meses, registro inalterable y sincronización horaria.", "p": "Una transacción cerca de medianoche cae en cortes distintos si los relojes no están sincronizados.", "g": "7.17, 9.23", "estado": "generado", "nota": "Cuatro de las seis alertas son de negocio, no de infraestructura"}, {"id": "3.9", "n": "Gestión de secretos y de llaves", "cap": "3", "capn": "Capa 3 · Arquitectura e infraestructura", "m": "c", "dep": ["3.7"], "t": "Gestor externo con inyección en despliegue, rotación, y ningún secreto persistido en base de datos. Contempla que la superficie crece con cada comercio si el alta es individual.", "p": "Migrar secretos en producción es costoso y riesgoso.", "g": "9.13, 7.24", "estado": "generado", "nota": "v0.3 · disparador del módulo criptográfico precisado por la especificación de cámara"}, {"id": "3.10", "n": "Infraestructura como código y convenciones", "cap": "3", "capn": "Capa 3 · Arquitectura e infraestructura", "m": "c", "dep": ["3.7"], "t": "Estado gestionado, plan y destrucción reproducibles, convención de nombres de hosts y dominios por cliente y ambiente con marcadores y no literales, y aprovisionamiento de cuenta desde cero.", "p": "El piloto crea el primer cliente: si se nombra con literales del piloto, el segundo hereda el error.", "g": "9.9, 10.2, 10.4", "estado": "generado", "nota": "Marcadores, nunca literales: el segundo cliente hereda el error del primero"}, {"id": "3.11", "n": "Modelo de amenazas y controles de acceso", "cap": "3", "capn": "Capa 3 · Arquitectura e infraestructura", "m": "c", "dep": ["3.2"], "t": "Superficie de ataque, autenticación multifactor para todo acceso incluido el administrativo interno, identificadores únicos y ausencia de cuentas compartidas.", "p": "Requisito del estándar y condición para operar con un cliente institucional.", "g": "9.24", "estado": "generado", "nota": "Incluye tres amenazas propias del desarrollo asistido por IA"}, {"id": "4.1", "n": "Estructura de repositorios y propiedad", "cap": "4", "capn": "Capa 4 · Andamiaje y calidad", "m": "c", "dep": ["3.1"], "t": "Uno o varios repositorios con decisión razonada, propiedad por servicio, y árboles de trabajo aislados por agente o desarrollador.", "p": "Causa raíz del error que más veces se repitió en la plataforma origen, y requisito de separación de funciones.", "g": "9.19", "estado": "generado", "nota": "3 repositorios: plataforma, dialectos, infraestructura. Frontera de importación estructural"}, {"id": "4.2", "n": "Plantilla de servicio", "cap": "4", "capn": "Capa 4 · Andamiaje y calidad", "m": "c", "dep": ["1.4", "4.1"], "t": "Servicio vacío que ya trae observabilidad, validación en frontera, migraciones, salud, apagado ordenado y pruebas. Se clona, no se reinventa.", "p": "Cada servicio escrito desde cero es superficie nueva de revisión.", "g": "—", "estado": "pendiente", "nota": ""}, {"id": "4.3", "n": "Pipeline y los cinco controles automatizados", "cap": "4", "capn": "Capa 4 · Andamiaje y calidad", "m": "c", "dep": ["0.4", "4.2"], "t": "Migraciones del modelo de lectura, unicidad de numeración, verificación en vivo de variables de entorno, prohibición de árboles compartidos y verificación previa de restricciones. Más los controles de las reglas irrevocables.", "p": "Cada control es una cicatriz de producción documentada. Automatizarlos es más barato que revisarlos.", "g": "9.18", "estado": "pendiente", "nota": ""}, {"id": "4.4", "n": "Especificación del simulador del procesador", "cap": "4", "capn": "Capa 4 · Andamiaje y calidad", "m": "c", "dep": ["1.5"], "t": "Ambos canales, catálogo de errores, latencia configurable y modo de fallo. Entregable de las semanas 1 y 2.", "p": "Es la única mitigación de la ventana de treinta horas semanales del ambiente de pruebas.", "g": "9.17, 3.14", "estado": "bloqueado", "nota": "Bloqueado por 1.5. Con D49 pasa a ejecutor de guiones de certificación"}, {"id": "4.5", "n": "Estrategia de pruebas", "cap": "4", "capn": "Capa 4 · Andamiaje y calidad", "m": "c", "dep": ["1.4", "4.4"], "t": "Pruebas de contrato contra los puertos, de integración contra el simulador, de carga con el volumen tope del piloto, y qué se prueba a mano y por qué.", "p": "Una prueba de contrato es revisión automatizada: reduce la carga del revisor humano.", "g": "—", "estado": "pendiente", "nota": ""}, {"id": "4.6", "n": "Definición de terminado y proceso de revisión", "cap": "4", "capn": "Capa 4 · Andamiaje y calidad", "m": "c", "dep": ["0.4"], "t": "Qué significa terminado por tipo de tarea, y el proceso de revisión por persona distinta del autor con aprobación documentada. Un agente no puede ser el revisor de registro.", "p": "Requisito directo del estándar y techo real de velocidad del proyecto.", "g": "9.20", "estado": "generado", "nota": "7 tipos de terminado, 3 niveles de revisión. Un agente asiste, no firma"}, {"id": "4.7", "n": "Convenciones de código y análisis estático", "cap": "4", "capn": "Capa 4 · Andamiaje y calidad", "m": "c", "dep": ["4.1"], "t": "Estilo, análisis estático, escaneo de dependencias y de secretos, y generación de inventario de componentes. Todo en el pipeline, no en la disciplina.", "p": "La prohibición de registrar el código de seguridad debe verificarse automáticamente.", "g": "9.15, 9.18", "estado": "generado", "nota": "Lista de permitidos en el registro, no de prohibidos. 4 controles de reglas"}, {"id": "5.1", "n": "Instrucciones por repositorio", "cap": "5", "capn": "Capa 5 · Guía para agentes", "m": "c", "dep": ["0.12", "4.1"], "t": "Un archivo por repositorio con el dominio, las reglas irrevocables aplicables, los comandos, y qué no tocar nunca.", "p": "Un agente sin contexto de repositorio produce código plausible y equivocado.", "g": "—", "estado": "pendiente", "nota": ""}, {"id": "5.2", "n": "Patrones de tarea y plantillas de encargo", "cap": "5", "capn": "Capa 5 · Guía para agentes", "m": "c", "dep": ["5.1", "4.6"], "t": "Cómo se formula una tarea para que el resultado sea revisable: alcance acotado, criterio de aceptación explícito, pruebas exigidas.", "p": "El tamaño de la tarea determina el coste de revisión, que es el recurso escaso.", "g": "—", "estado": "pendiente", "nota": ""}, {"id": "5.3", "n": "Protocolo de verificación humana", "cap": "5", "capn": "Capa 5 · Guía para agentes", "m": "c", "dep": ["4.6"], "t": "Qué revisa una persona siempre, qué se delega a control automatizado, y cómo se documenta la aprobación para el evaluador.", "p": "La evidencia de revisión es lo que se audita, no la revisión misma.", "g": "9.20", "estado": "pendiente", "nota": ""}, {"id": "6.1", "n": "Marco escrito del piloto", "cap": "6", "capn": "Capa 6 · Operación y cliente", "m": "d", "dep": [], "t": "Comercios contados, volumen tope, fecha de término y remediación comprometida con responsable y fecha. Firmado antes de la primera transacción.", "p": "Un piloto sin marco se convierte en producción por inercia y la deuda deliberada opera sobre dinero real sin plan de pago.", "g": "10.7", "estado": "pendiente", "nota": ""}, {"id": "6.2", "n": "Procedimiento de incorporación de cliente", "cap": "6", "capn": "Capa 6 · Operación y cliente", "m": "d", "dep": ["3.10"], "t": "Quién solicita, quién autoriza, con qué información mínima, y el paso obligatorio de alta de la dirección de salida con el procesador.", "p": "Hueco declarado explícitamente por el equipo origen. Es lo que más limita escalar clientes.", "g": "10.1, 10.6", "estado": "pendiente", "nota": ""}, {"id": "6.3", "n": "Criterio de salida a producción", "cap": "6", "capn": "Capa 6 · Operación y cliente", "m": "d", "dep": ["6.2"], "t": "Lista de verificación cerrada de lo que debe estar resuelto antes de declarar producción, por cliente.", "p": "Sin criterio de salida, el marco del piloto no es verificable.", "g": "10.5", "estado": "pendiente", "nota": ""}, {"id": "6.4", "n": "Matriz de responsabilidades compartidas", "cap": "6", "capn": "Capa 6 · Operación y cliente", "m": "d", "dep": ["1.9", "3.3"], "t": "Qué controla Centrix, qué el procesador y qué el cliente, control por control. Anexo contractual, no documento interno.", "p": "Es exigible por los clientes de Centrix y por el evaluador. No es opcional.", "g": "10.8", "estado": "pendiente", "nota": ""}, {"id": "6.5", "n": "Definición y medición del nivel de servicio", "cap": "6", "capn": "Capa 6 · Operación y cliente", "m": "d", "dep": ["3.8"], "t": "Qué se mide, cómo, con qué ventana, qué se excluye y cómo se reporta al cliente. Medición desde el primer día.", "p": "Un nivel de 99.5 % que no se mide no se puede defender en una disputa contractual.", "g": "7.21", "estado": "pendiente", "nota": ""}, {"id": "6.6", "n": "Manual de operación y escalamiento", "cap": "6", "capn": "Capa 6 · Operación y cliente", "m": "d", "dep": ["3.8", "3.6"], "t": "Procedimientos ante caída del procesador, del bus, de la base de datos; alerta por ausencia de consumo; y a quién se escala y en cuánto tiempo.", "p": "El piloto opera sobre dinero real desde la primera transacción.", "g": "7.19, 9.12", "estado": "pendiente", "nota": ""}, {"id": "6.7", "n": "Procedimiento de conciliación y excepciones", "cap": "6", "capn": "Capa 6 · Operación y cliente", "m": "d", "dep": ["0.8", "1.6"], "t": "Clasificación de partidas, bitácora de diferencias, regla de no dispersar lo no conciliado, y flujo de resolución con responsable y vencimiento.", "p": "Es el dolor declarado del mercado y el control que protege el dinero antes de que se mueva.", "g": "6.17, 6.26", "estado": "pendiente", "nota": ""}, {"id": "6.8", "n": "Plan de continuidad y recuperación", "cap": "6", "capn": "Capa 6 · Operación y cliente", "m": "d", "dep": ["3.6"], "t": "Probado, no solo escrito. Con la deuda del piloto declarada y su fecha de vencimiento.", "p": "Requisito contractual del segundo cliente en adelante.", "g": "7.28", "estado": "pendiente", "nota": ""}, {"id": "7.1", "n": "Determinación de alcance PCI y análisis de brecha", "cap": "7", "capn": "Capa 7 · Cumplimiento y riesgo", "m": "e", "dep": ["3.2", "3.3"], "t": "Sobre la arquitectura objetivo y no sobre el código, con evaluador calificado contratado en el mes 2 a 3.", "p": "Contratarlo tarde convierte cada hallazgo en un rediseño en vez de un ajuste.", "g": "10.12, 7.23", "estado": "pendiente", "nota": ""}, {"id": "7.2", "n": "Políticas de seguridad de la información", "cap": "7", "capn": "Capa 7 · Cumplimiento y riesgo", "m": "e", "dep": ["3.11"], "t": "El cuerpo de políticas que el estándar exige, redactadas para esta arquitectura y no copiadas de una plantilla.", "p": "Es lo que se audita cuando el código ya está bien.", "g": "9.24", "estado": "pendiente", "nota": ""}, {"id": "7.3", "n": "Registro de riesgos y de deuda deliberada", "cap": "7", "capn": "Capa 7 · Cumplimiento y riesgo", "m": "e", "dep": ["6.1"], "t": "Cada atajo del piloto con su justificación, su responsable, su fecha de vencimiento y su plan de pago.", "p": "Deuda declarada con vencimiento es ingeniería. Deuda no declarada es solo deuda.", "g": "10.7", "estado": "pendiente", "nota": ""}, {"id": "7.4", "n": "Registro de compuertas y decisiones abiertas", "cap": "7", "capn": "Capa 7 · Cumplimiento y riesgo", "m": "e", "dep": [], "t": "Las diecisiete compuertas con responsable, fecha comprometida y consecuencia si no se cierra. Se revisa semanalmente.", "p": "Ninguna compuerta se resuelve con desarrollo, y todas invalidan o recortan el piloto.", "g": "Hoja Compuertas", "estado": "pendiente", "nota": ""}];
+const SRCH=d=>(d.id+' '+d.n+' '+d.t+' '+d.p+' '+d.g+' '+d.capn).toLowerCase().replace(/"/g,'');
+const MN={a:"días 1-3",b:"semana 1",c:"semana 2",d:"semanas 3-10",e:"mes 0-3"};
+const IX={};D.forEach(d=>IX[d.id]=d);
+D.forEach(d=>d.feed=[]);
+D.forEach(d=>d.dep.forEach(p=>IX[p]&&IX[p].feed.push(d.id)));
+const LV={};function lv(i){if(LV[i]!=null)return LV[i];const d=IX[i];
+LV[i]=d.dep.length?1+Math.max(...d.dep.map(lv)):0;return LV[i];}
+D.forEach(d=>d.lv=lv(d.id));
+const CAPS=[];D.forEach(d=>{if(!CAPS.find(c=>c.k===d.cap))CAPS.push({k:d.cap,n:d.capn,d:[]});
+CAPS.find(c=>c.k===d.cap).d.push(d);});
+function anc(i,s){s=s||new Set();IX[i].dep.forEach(p=>{if(!s.has(p)){s.add(p);anc(p,s)}});return s}
+function des(i,s){s=s||new Set();IX[i].feed.forEach(p=>{if(!s.has(p)){s.add(p);des(p,s)}});return s}
+let sel=null,flt=null,fst=null,q="";
+const EST={generado:"#2E7D3A",bloqueado:"#A32D2D",pendiente:"#B4B2A9"};
+
+const vc=document.getElementById("v-capas");
+CAPS.forEach(c=>{const ms=[...new Set(c.d.map(x=>x.m))];
+let h='<div class="lh"><span class="cv">&#9654;</span><span style="font-size:15px;font-weight:600;flex:1">'+c.n+'</span>';
+ms.forEach(m=>h+='<span class="pill" style="background:var(--m'+m+');color:var(--m'+m+'t)">'+MN[m]+'</span>');
+h+='<span style="font-size:13px;color:var(--t3);min-width:54px;text-align:right">'+c.d.length+' docs</span></div><div class="body">';
+c.d.forEach(x=>{h+='<div class="doc" id="D'+x.id+'" data-m="'+x.m+'" data-e="'+x.estado+'" data-n="'+SRCH(x)+'">'
++'<div class="dr"><span class="dot" style="background:var(--m'+x.m+'a)"></span>'
++'<span class="did">'+(x.estado==="generado"?'<span class="tick">&#10003;</span> ':'')+x.id+'</span>'
++'<span class="dn">'+x.n+(x.nota?'<div class="nota">'+x.nota+'</div>':'')+'</span>'
++'<span class="st st-'+x.estado+'">'+x.estado+'</span>'
++'<span style="font-size:12px;color:var(--t3)">ola '+x.lv+'</span></div><div class="det">'
++'<div><span class="lb">Terminado cuando</span>'+x.t+'</div>'
++'<div style="margin-top:5px"><span class="lb">Por qué aquí</span>'+x.p+'</div>'
++'<div style="margin-top:7px"><span class="lb">Depende de</span>'
++(x.dep.length?x.dep.map(p=>'<span class="chip" data-go="'+p+'">'+p+' · '+IX[p].n+'</span>').join(''):'<span style="color:var(--t3)">nada, puede arrancar ya</span>')
++'</div><div style="margin-top:4px"><span class="lb">Alimenta a</span>'
++(x.feed.length?x.feed.map(p=>'<span class="chip" data-go="'+p+'">'+p+' · '+IX[p].n+'</span>').join(''):'<span style="color:var(--t3)">hoja terminal</span>')
++'</div><div style="margin-top:4px"><span class="lb">Requisitos</span>'+x.g+'</div></div></div>';});
+h+='</div>';const el=document.createElement("div");
+el.className="lay"+(c.k==="6"||c.k==="7"?" par":"");el.id="L"+c.k;el.innerHTML=h;vc.appendChild(el);});
+vc.querySelectorAll(".lh").forEach(x=>x.onclick=()=>x.parentElement.classList.toggle("open"));
+vc.querySelectorAll(".doc").forEach(x=>x.onclick=e=>{
+if(e.target.dataset.go){go(e.target.dataset.go);return}x.classList.toggle("open")});
+
+const MX=Math.max(...D.map(d=>d.lv));
+const vs=document.getElementById("v-sec");
+for(let i=0;i<=MX;i++){const g=D.filter(d=>d.lv===i).sort((a,b)=>a.cap.localeCompare(b.cap));
+const el=document.createElement("div");el.className="wave";
+el.innerHTML='<div class="wh"><span class="wt">Ola '+i+'</span><span class="wn">'
++(i===0?'sin dependencias · puede arrancar hoy':'no puede empezar antes de que la ola '+(i-1)+' esté congelada')
++' · '+g.length+' docs</span></div><div class="nodes">'
++g.map(x=>'<span class="nd" data-m="'+x.m+'" data-id="'+x.id+'" data-e="'+x.estado+'" data-n="'+SRCH(x)
++'" style="background:var(--m'+x.m+');color:var(--m'+x.m+'t)">'+x.id+' <small>'+x.n+'</small></span>').join('')
++'</div>';vs.appendChild(el);}
+
+const NW=86,NH=26,GX=14,GY=74,PX=16,PY=16;
+const rows=[];for(let i=0;i<=MX;i++)rows.push(D.filter(d=>d.lv===i).sort((a,b)=>a.cap.localeCompare(b.cap)));
+const W=Math.max(...rows.map(r=>r.length))*(NW+GX)-GX+PX*2;
+const H=(MX+1)*GY-GY+NH+PY*2+18;const POS={};
+rows.forEach((r,i)=>{const off=PX+(W-PX*2-(r.length*(NW+GX)-GX))/2;
+r.forEach((d,j)=>POS[d.id]={x:off+j*(NW+GX),y:PY+18+i*GY});});
+let g='<svg id="gsvg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" style="display:block">';
+rows.forEach((r,i)=>{g+='<text x="'+PX+'" y="'+(PY+14+i*GY)+'" font-size="11" fill="var(--t3)">ola '+i+'</text>';});
+D.forEach(d=>d.dep.forEach(p=>{const a=POS[p],b=POS[d.id];if(!a||!b)return;
+const x1=a.x+NW/2,y1=a.y+NH,x2=b.x+NW/2,y2=b.y,my=(y1+y2)/2;
+g+='<path class="ed" data-a="'+p+'" data-b="'+d.id+'" d="M'+x1+' '+y1+'C'+x1+' '+my+' '+x2+' '+my+' '+x2+' '+y2
++'" fill="none" stroke="var(--bd2)" stroke-width="1"/>';}));
+D.forEach(d=>{const p=POS[d.id];
+g+='<g class="gn" data-id="'+d.id+'" data-e="'+d.estado+'" data-n="'+SRCH(d)+'" style="cursor:pointer">'
++'<rect x="'+p.x+'" y="'+p.y+'" width="'+NW+'" height="'+NH+'" rx="7" fill="var(--m'+d.m+')" stroke="var(--m'+d.m+'a)" stroke-width="1"/>'
++'<text x="'+(p.x+NW/2)+'" y="'+(p.y+17)+'" text-anchor="middle" font-size="12.5" fill="var(--m'+d.m+'t)">'+d.id+'</text>'
++'<title>'+d.id+' · '+d.n+'</title></g>';});
+g+='</svg>';document.getElementById("gwrap").innerHTML=g;
+const SVG=document.getElementById("gsvg");
+function focus(id){const A=id?anc(id):null,B=id?des(id):null;
+SVG.querySelectorAll(".gn").forEach(n=>{const i=n.dataset.id;
+n.classList.toggle("dim",!!id&&i!==id&&!A.has(i)&&!B.has(i));});
+SVG.querySelectorAll(".ed").forEach(e=>{const a=e.dataset.a,b=e.dataset.b;
+const inC=id&&((a===id||A.has(a)||B.has(a))&&(b===id||A.has(b)||B.has(b)));
+e.classList.toggle("dim",!!id&&!inC);
+e.setAttribute("stroke",inC?"var(--maa)":"var(--bd2)");
+e.setAttribute("stroke-width",inC?"1.6":"1");});}
+SVG.querySelectorAll(".gn").forEach(n=>{n.onmouseenter=()=>{if(!sel)focus(n.dataset.id)};
+n.onmouseleave=()=>{if(!sel)focus(null)};n.onclick=()=>{sel=sel===n.dataset.id?null:n.dataset.id;
+focus(sel);show(sel);};});
+
+const DP={},PREV={};function lp(i){if(DP[i]!=null)return DP[i];let b=0,pv=null;
+IX[i].dep.forEach(p=>{const v=1+lp(p);if(v>b){b=v;pv=p}});DP[i]=b;PREV[i]=pv;return b;}
+D.forEach(d=>lp(d.id));
+const end=D.reduce((a,b)=>DP[b.id]>DP[a.id]?b:a);
+let path=[],c=end.id;while(c){path.unshift(c);c=PREV[c];}
+const vk=document.getElementById("v-crit");
+vk.innerHTML='<div class="wave"><div class="wh"><span class="wt">Cadena más larga del paquete</span>'
++'<span class="wn">'+path.length+' documentos encadenados · determina el suelo del calendario</span></div>'
++'<div class="crit">'+path.map((p,i)=>'<span class="nd" data-id="'+p+'" data-e="'+IX[p].estado+'" data-n="'+SRCH(IX[p])
++'" style="background:var(--m'+IX[p].m+');color:var(--m'+IX[p].m+'t)">'+p+' <small>'+IX[p].n+'</small></span>'
++(i<path.length-1?'<span class="arw">&#8594;</span>':'')).join('')+'</div></div>'
++'<div class="wave"><div class="wh"><span class="wt">Documentos con más carga aguas abajo</span>'
++'<span class="wn">si se retrasan, arrastran todo lo que cuelga de ellos</span></div>'
++'<table><tr><th>ID</th><th>Documento</th><th>Ola</th><th>Descendientes</th></tr>'
++D.map(d=>({d:d,n:des(d.id).size})).sort((a,b)=>b.n-a.n).slice(0,10)
+.map(r=>'<tr><td><span class="nd" data-id="'+r.d.id+'" data-n="'+SRCH(r.d)
++'" style="background:var(--m'+r.d.m+');color:var(--m'+r.d.m+'t)">'+r.d.id+'</span></td><td>'+r.d.n
++'</td><td>'+r.d.lv+'</td><td>'+r.n+'</td></tr>').join('')+'</table></div>'
++'<div class="wave"><div class="wh"><span class="wt">Puntos de entrada</span>'
++'<span class="wn">no dependen de nada; son los únicos que pueden arrancar hoy</span></div><div class="nodes">'
++D.filter(d=>!d.dep.length).map(x=>'<span class="nd" data-id="'+x.id+'" data-n="'+SRCH(x)
++'" style="background:var(--m'+x.m+');color:var(--m'+x.m+'t)">'+x.id+' <small>'+x.n+'</small></span>').join('')+'</div></div>';
+
+function show(id){const p=document.getElementById("panel");
+if(!id){p.classList.add("hide");return}const d=IX[id];p.classList.remove("hide");
+p.innerHTML='<h3>'+d.id+' · '+d.n+'</h3>'
++'<div style="margin-bottom:6px"><span class="st st-'+d.estado+'">'+d.estado+'</span> '
++'<span class="lb"> '+d.capn+' · '+MN[d.m]+' · ola '+d.lv+'</span></div>'
++(d.nota?'<div class="nota" style="margin-bottom:6px">'+d.nota+'</div>':'')
++'<div><span class="lb">Terminado cuando</span>'+d.t+'</div>'
++'<div style="margin-top:5px"><span class="lb">Por qué aquí</span>'+d.p+'</div>'
++'<div style="margin-top:7px"><span class="lb">Depende de</span>'
++(d.dep.length?d.dep.map(x=>'<span class="chip" data-go="'+x+'">'+x+' · '+IX[x].n+'</span>').join(''):'<span style="color:var(--t3)">nada</span>')
++'</div><div style="margin-top:4px"><span class="lb">Alimenta a</span>'
++(d.feed.length?d.feed.map(x=>'<span class="chip" data-go="'+x+'">'+x+' · '+IX[x].n+'</span>').join(''):'<span style="color:var(--t3)">hoja terminal</span>')
++'</div><div style="margin-top:4px"><span class="lb">Arrastra</span>'+des(d.id).size+' documentos aguas abajo · '
++anc(d.id).size+' aguas arriba</div>';}
+
+function go(id){tab("capas");document.getElementById("L"+IX[id].cap).classList.add("open");
+const e=document.getElementById("D"+id);e.classList.add("open","hl");
+e.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>e.classList.remove("hl"),1700);show(id);}
+document.body.addEventListener("click",e=>{
+if(e.target.dataset&&e.target.dataset.go){go(e.target.dataset.go);return}
+const n=e.target.closest(".nd");if(n&&n.dataset.id){document.querySelectorAll(".nd").forEach(x=>x.classList.remove("sel"));
+n.classList.add("sel");show(n.dataset.id);}});
+
+function tab(v){document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.v===v));
+document.querySelectorAll(".view").forEach(x=>x.classList.toggle("on",x.id==="v-"+v));}
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>tab(t.dataset.v));
+document.getElementById("all").onclick=e=>{const o=e.target.textContent[0]==="E";
+document.querySelectorAll(".lay").forEach(l=>l.classList.toggle("open",o));
+e.target.textContent=o?"Contraer todo":"Expandir todo";};
+function apply(){let v=0;
+document.querySelectorAll("[data-n]").forEach(el=>{const id=el.dataset.id||el.id.slice(1);
+const d=IX[id];if(!d)return;const ok=(!flt||d.m===flt)&&(!fst||d.estado===fst)&&(!q||el.dataset.n.includes(q));
+if(el.classList.contains("doc")){el.classList.toggle("hide",!ok);if(ok)v++}
+else if(el.tagName==="g"){el.classList.toggle("hide",!ok)}
+else el.classList.toggle("hide",!ok);});
+document.querySelectorAll(".lay").forEach(l=>{const any=l.querySelectorAll(".doc:not(.hide)").length;
+l.style.opacity=any?"1":".3";if((flt||q)&&any)l.classList.add("open");});
+document.querySelectorAll(".wave").forEach(w=>{const a=w.querySelectorAll(".nd:not(.hide)").length;
+if(w.querySelector(".nodes"))w.style.opacity=a?"1":".3";});
+document.getElementById("cnt").textContent=(flt||fst||q)?v+" de 62":"";}
+document.querySelectorAll(".fl[data-m]").forEach(b=>b.onclick=()=>{flt=flt===b.dataset.m?null:b.dataset.m;
+document.querySelectorAll(".fl[data-m]").forEach(o=>o.classList.toggle("on",o.dataset.m===flt));apply();});
+document.getElementById("q").oninput=e=>{q=e.target.value.trim().toLowerCase();apply();};
+document.querySelectorAll(".fl[data-s]").forEach(b=>b.onclick=()=>{fst=fst===b.dataset.s?null:b.dataset.s;
+document.querySelectorAll(".fl[data-s]").forEach(o=>o.classList.toggle("on",o.dataset.s===fst));
+document.querySelectorAll(".fl[data-s]").forEach(o=>{o.style.background=o.classList.contains("on")?EST[o.dataset.s]+"22":"";
+o.style.color=o.classList.contains("on")?EST[o.dataset.s]:"";o.style.borderColor=o.classList.contains("on")?"transparent":"";});
+apply();});
+(function(){const c={generado:0,bloqueado:0,pendiente:0};D.forEach(d=>c[d.estado]++);
+document.getElementById("kpi").innerHTML=
+'<span><b>'+c.generado+'</b> de 62 generados</span>'
++'<span><b>'+Math.round(c.generado/62*100)+'%</b> del paquete</span>'
++'<span><b>'+c.bloqueado+'</b> bloqueados por documentación externa</span>'
++'<span><b>'+c.pendiente+'</b> pendientes</span>';
+document.getElementById("prog").innerHTML=
+'<i style="width:'+(c.generado/62*100)+'%;background:'+EST.generado+'"></i>'
++'<i style="width:'+(c.bloqueado/62*100)+'%;background:'+EST.bloqueado+'"></i>';})();
+document.getElementById("L0").classList.add("open");
+</script></body></html>
